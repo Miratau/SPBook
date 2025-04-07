@@ -3,10 +3,7 @@
 import os
 import json
 import time
-from openai import OpenAI
-client = OpenAI(
-    api_key=os.environ.get('OPENAI_API_KEY'),
-)
+import requests
 
 def generate_prompt1(chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation):
     prompt = ( "Task: You are a student preparing to ask questions about a textbook subsection to a teacher. "
@@ -45,15 +42,27 @@ def generate_prompt2(chapter_title, section_title,context, chapter_summary, bold
     
     return prompt
 def generate_response0(prompt, model):
+    url = "http://localhost:11434/api/generate"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "model": "llama2",
+        "prompt": prompt,
+        "stream": False
+    }
+    
     while True:
         try:
-            completion = client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": prompt}]
-             )
-            return completion
-        except:
-            print("Error occurred while generating response. Retrying in 2 seconds...")
+            response = requests.post(url, headers=headers, data=json.dumps(data))
+            if response.status_code == 200:
+                response_data = json.loads(response.text)
+                return response_data["response"]
+            else:
+                print(f"Error: {response.status_code} {response.text}")
+                time.sleep(2)
+        except Exception as e:
+            print(f"Error occurred while generating response: {str(e)}. Retrying in 2 seconds...")
             time.sleep(2)
 
 def generate_question(chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation, model):
