@@ -5,6 +5,7 @@ import json
 import time
 import requests
 
+
 def generate_prompt1(chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation):
     prompt = ( "Task: You are a student preparing to ask questions about a textbook subsection to a teacher. "
     "Your goal is to uncover the key information from this subsection. Based on the teacher's responses, "
@@ -24,6 +25,8 @@ def generate_prompt1(chapter_title, section_title, chapter_summary, bold_terms, 
     "Expected Output: Please phrase your question as a string.")
     
     return prompt
+
+
 def generate_prompt2(chapter_title, section_title,context, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation,question):
     prompt = ("Task: You are a teacher preparing to answer a student's question about a subsection of a textbook. "
     f"The student's question is: {question}. Provide a concise, specific response, ensuring it's not a summary and "
@@ -44,13 +47,15 @@ def generate_prompt2(chapter_title, section_title,context, chapter_summary, bold
     f"Expected Output: Please phrase your answer as a string.")
     
     return prompt
+
+
 def generate_response0(prompt, model):
     url = "http://localhost:11434/api/generate"
     headers = {
         "Content-Type": "application/json"
     }
     data = {
-        "model": "llama2",
+        "model": "gemma3",
         "prompt": prompt,
         "stream": False
     }
@@ -68,12 +73,15 @@ def generate_response0(prompt, model):
             print(f"Error occurred while generating response: {str(e)}. Retrying in 2 seconds...")
             time.sleep(2)
 
+
 def generate_question(chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation, model):
     prompt = generate_prompt1(chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation)
     completion = generate_response0(prompt, model)
     question = completion.choices[0].message.content
     # escaped_content = question.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\t', '\\t')
     return question
+
+
 def generate_answer(question, context, chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation, model):
     if not question:
         print('Empty question was given as input.')
@@ -87,12 +95,14 @@ def generate_answer(question, context, chapter_title, section_title, chapter_sum
 # Can use different models to do this task, for example: gpt-4o
 model_name = "gpt-3.5-turbo"
 
+
 def make_json_friendly(s):
     # Escape backslashes
     s = s.replace("\\", "\\\\")
     # Escape double quotes
     s = s.replace('"', '\\"')
     return s
+
 
 def generate_dialog_for_section(section, model_name, turns=12):
     chapter_title = section["title"]
@@ -125,10 +135,12 @@ def generate_dialog_for_section(section, model_name, turns=12):
     
     return dialogs
 
+
 def append_to_jsonl(dialog, filename):
     with open(filename, "a") as outfile:
         outfile.write(json.dumps(dialog))
         outfile.write("\n")
+
 
 def check_current_progress(filename):
     """
@@ -142,6 +154,7 @@ def check_current_progress(filename):
         return completed_sections
     except FileNotFoundError:
         return 0
+
 
 def generate_and_save_dialogs(data, model_name, filename, turns=12):
     # Check current progress
@@ -157,6 +170,7 @@ def generate_and_save_dialogs(data, model_name, filename, turns=12):
             
         }
         append_to_jsonl(dialog_data, filename)
+
 
 if __name__ == "__main__":
     # Load the data
