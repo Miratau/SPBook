@@ -80,17 +80,13 @@ def generate_question(chapter_title, section_title, chapter_summary, bold_terms,
     question = completion.choices[0].message.content
     # escaped_content = question.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\t', '\\t')
     return question
-
-
 def generate_answer(question, context, chapter_title, section_title, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation, model):
     if not question:
         print('Empty question was given as input.')
         return None
     prompt = generate_prompt2(chapter_title, section_title, context, chapter_summary, bold_terms, learning_objectives, concepts, introduction, previous_conversation,question)
-    completion = generate_response0(prompt, model)
-    answer = completion.choices[0].message.content
-    # escaped_content = answer_data.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\t', '\\t')
-    return answer
+    response = generate_response0(prompt, model)
+    return response
 
 # Can use different models to do this task, for example: gpt-4o
 model_name = "gpt-3.5-turbo"
